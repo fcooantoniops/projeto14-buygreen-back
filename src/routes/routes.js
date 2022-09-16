@@ -1,8 +1,8 @@
 import express from 'express';
-import { media } from './authRouter.js';
+import { authRouter } from './authRouter.js';
 
 const router = express.Router();
 
-router.use(media);
+router.use(authRouter);
 
 export default router;

@@ -42,7 +42,7 @@ export async function signUp(req, res) {
 export async function logIn(req, res) {
     const credentials = req.body;
 
-    credentialsSchema = joi.object({
+    const credentialsSchema = joi.object({
         email: joi.string().required(),
         password: joi.string().required()
     });
