@@ -29,7 +29,7 @@ const postCartSchema = joi.object({
   name: joi.string().required(),
   img: joi.string().uri().required(),
   price: joi.number().required(),
-  idProduct: joi.required(), //Talvez precise do idUser
+  idProduct: joi.required(),
 });
 
 app.post("/cartShopping", async (req, res) => {
