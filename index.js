@@ -29,7 +29,7 @@ const postCartSchema = joi.object({
   name: joi.string().required(),
   img: joi.string().uri().required(),
   price: joi.number().required(),
-  idProduct: joi.required(),
+  _id: joi.required(),
 });
 
 app.post("/cartShopping", async (req, res) => {
@@ -86,7 +86,7 @@ app.get("/cartShopping", async (req, res) => {
 });
 
 app.delete("/cartShopping", async (req, res) => {
-  const { idProduct } = req.body;
+  const { _id } = req.body;
 
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) {
@@ -107,9 +107,7 @@ app.delete("/cartShopping", async (req, res) => {
       return res.sendStatus(401);
     }
 
-    const oneProduct = userProducts.find(
-      (value) => value.idProduct === idProduct
-    );
+    const oneProduct = userProducts.find((value) => value._id === _id);
     if (!oneProduct) {
       return res.sendStatus(401);
     }
@@ -123,7 +121,7 @@ app.delete("/cartShopping", async (req, res) => {
 });
 
 app.put("/cartShopping/true", async (req, res) => {
-  const { idProduct } = req.body;
+  const { _id } = req.body;
 
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) {
@@ -144,9 +142,7 @@ app.put("/cartShopping/true", async (req, res) => {
       return res.sendStatus(401);
     }
 
-    const oneProduct = userProducts.find(
-      (value) => value.idProduct === idProduct
-    );
+    const oneProduct = userProducts.find((value) => value._id === _id);
     if (!oneProduct) {
       return res.sendStatus(401);
     }
@@ -163,7 +159,7 @@ app.put("/cartShopping/true", async (req, res) => {
 });
 
 app.put("/cartShopping/false", async (req, res) => {
-  const { idProduct } = req.body;
+  const { _id } = req.body;
 
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) {
@@ -184,9 +180,7 @@ app.put("/cartShopping/false", async (req, res) => {
       return res.sendStatus(401);
     }
 
-    const oneProduct = userProducts.find(
-      (value) => value.idProduct === idProduct
-    );
+    const oneProduct = userProducts.find((value) => value._id === _id);
     if (!oneProduct) {
       return res.sendStatus(401);
     }
