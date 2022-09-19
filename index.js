@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import joi from "joi";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import router from "./src/routes/routes.js";
 
 dotenv.config();
@@ -29,12 +29,12 @@ const postCartSchema = joi.object({
   name: joi.string().required(),
   img: joi.string().uri().required(),
   price: joi.number().required(),
-  id: joi.number().required(),
+  idProduct: joi.required(), //Talvez precise do idUser
 });
 
 app.post("/cartShopping", async (req, res) => {
-  const { name, img, price, id } = req.body;
   const token = req.headers.authorization?.replace("Bearer ", "");
+  console.log(token);
   if (!token) {
     res.sendStatus(401);
   }
@@ -51,13 +51,6 @@ app.post("/cartShopping", async (req, res) => {
       res.sendStatus(401);
     }
 
-    const user = await db.collection("users").findOne({
-      _id: session.userId,
-    });
-    if (!user) {
-      return res.sendStatus(401);
-    }
-
     await db
       .collection("cartShopping")
       .insertOne({ ...req.body, userId: session.userId });
@@ -71,39 +64,137 @@ app.post("/cartShopping", async (req, res) => {
 app.get("/cartShopping", async (req, res) => {
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) {
-    res.sendStatus(401);
+    return res.sendStatus(401);
   }
 
   try {
     const session = await db.collection("sessions").findOne({ token });
     if (!session) {
-      res.sendStatus(401);
+      return res.sendStatus(401);
     }
 
-    const cartUser = await db
+    const cartProducts = await db
       .collection("cartShopping")
       .find({ userId: session.userId })
       .toArray();
-    res.send(cartUser);
+
+    res.send(cartProducts);
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
   }
 });
 
-app.delete("/cartProduct/:idProduct", async (req, res) => {
-  const idProduct = req.params.idProduct;
+app.delete("/cartShopping", async (req, res) => {
+  const { idProduct } = req.body;
+
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) {
-    res.sendStatus(401);
+    return res.sendStatus(401);
   }
   try {
     const session = await db.collection("sessions").findOne({ token });
     if (!session) {
-      res.sendStatus(401);
+      return res.sendStatus(401);
     }
 
-    await db.collection("cartShopping").deleteOne({ idProduct });
+    const userProducts = await db
+      .collection("cartShopping")
+      .find({ userId: session.userId })
+      .toArray();
+
+    if (!userProducts) {
+      return res.sendStatus(401);
+    }
+
+    const oneProduct = userProducts.find(
+      (value) => value.idProduct === idProduct
+    );
+    if (!oneProduct) {
+      return res.sendStatus(401);
+    }
+
+    await db.collection("cartShopping").deleteOne(oneProduct);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+app.put("/cartShopping/true", async (req, res) => {
+  const { idProduct } = req.body;
+
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  if (!token) {
+    return res.sendStatus(401);
+  }
+  try {
+    const session = await db.collection("sessions").findOne({ token });
+    if (!session) {
+      return res.sendStatus(401);
+    }
+
+    const userProducts = await db
+      .collection("cartShopping")
+      .find({ userId: session.userId })
+      .toArray();
+
+    if (!userProducts) {
+      return res.sendStatus(401);
+    }
+
+    const oneProduct = userProducts.find(
+      (value) => value.idProduct === idProduct
+    );
+    if (!oneProduct) {
+      return res.sendStatus(401);
+    }
+
+    await db
+      .collection("cartShopping")
+      .updateOne(oneProduct, { $set: { selected: "true" } });
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+app.put("/cartShopping/false", async (req, res) => {
+  const { idProduct } = req.body;
+
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  if (!token) {
+    return res.sendStatus(401);
+  }
+  try {
+    const session = await db.collection("sessions").findOne({ token });
+    if (!session) {
+      return res.sendStatus(401);
+    }
+
+    const userProducts = await db
+      .collection("cartShopping")
+      .find({ userId: session.userId })
+      .toArray();
+
+    if (!userProducts) {
+      return res.sendStatus(401);
+    }
+
+    const oneProduct = userProducts.find(
+      (value) => value.idProduct === idProduct
+    );
+    if (!oneProduct) {
+      return res.sendStatus(401);
+    }
+
+    await db
+      .collection("cartShopping")
+      .updateOne(oneProduct, { $set: { selected: "false" } });
+
     res.sendStatus(200);
   } catch (error) {
     console.error(error);
